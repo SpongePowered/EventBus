@@ -2,6 +2,7 @@ package net.minecraftforge.eventbus.test;
 
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import net.minecraftforge.eventbus.api.Cause;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.BeforeAll;
@@ -45,7 +46,8 @@ public class GoodEventDispatcherTest {
             eventBus = WhiteboxImpl.invokeMethod(busBuilder, "build");
             transformedClass = Class.forName("net.minecraftforge.eventbus.testjar.EventBusTestClass", true, contextClassLoader);
             WhiteboxImpl.invokeMethod(eventBus, "register", transformedClass.newInstance());
-            Object evt = Class.forName("net.minecraftforge.eventbus.testjar.DummyEvent$GoodEvent", true, contextClassLoader).newInstance();
+            Cause cause = Cause.of(this);
+            Object evt = Class.forName("net.minecraftforge.eventbus.testjar.DummyEvent$GoodEvent", true, contextClassLoader).getConstructor(Cause.class).newInstance(cause);
             WhiteboxImpl.invokeMethod(eventBus, "post",evt);
             return null;
         };

@@ -39,7 +39,9 @@ import java.util.stream.Stream;
 import static net.minecraftforge.eventbus.LogMarkers.EVENTBUS;
 
 public class EventBus implements IEventExceptionHandler, IEventBus {
+
     private static final Logger LOGGER = LogManager.getLogger();
+    private final Cause REGISTRATION_CAUSE = Cause.of(this);
     private static AtomicInteger maxID = new AtomicInteger(0);
     private final boolean trackPhases;
 
@@ -219,9 +221,9 @@ public class EventBus implements IEventExceptionHandler, IEventBus {
                 LOGGER.fatal(EVENTBUS,"Unable to register listener on abstract class {}", eventType.getName());
                 throw new RuntimeException("Unable to register an event listener on abstract event class "+ eventType.getName());
             }
-            Constructor<?> ctr = eventType.getConstructor();
+            Constructor<?> ctr = eventType.getConstructor(Cause.class);
             ctr.setAccessible(true);
-            Event event = (Event)ctr.newInstance();
+            Event event = (Event)ctr.newInstance(REGISTRATION_CAUSE);
             event.getListenerList().register(busID, priority, listener);
 
             ArrayList<IEventListener> others = listeners.computeIfAbsent(target, k -> new ArrayList<>());

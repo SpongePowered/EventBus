@@ -16,7 +16,7 @@ public class EventBusTestClass {
     }
 
     @SubscribeEvent
-    public void evtMethod3(DummyEvent.CancellableEvent evt) {
+    public void evtMethod3(DummyEvent.CancelableEvent evt) {
 
     }
 

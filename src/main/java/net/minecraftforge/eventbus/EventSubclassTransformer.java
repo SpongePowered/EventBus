@@ -19,6 +19,7 @@
 
 package net.minecraftforge.eventbus;
 
+import net.minecraftforge.eventbus.api.Cause;
 import net.minecraftforge.eventbus.api.Event;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,6 +86,8 @@ public class EventSubclassTransformer
         boolean hasResult          = false;
         String voidDesc            = Type.getMethodDescriptor(VOID_TYPE);
         String boolDesc            = Type.getMethodDescriptor(BOOLEAN_TYPE);
+        final Type tCause = Type.getType(Cause.class); // Sure, it's a class load, but this is controlled by us, no one should be modifying it.
+        String causeDesc           = Type.getMethodDescriptor(VOID_TYPE, tCause);
         String listDesc            = tList.getDescriptor();
         String listDescM           = Type.getMethodDescriptor(tList);
 
@@ -97,7 +100,7 @@ public class EventSubclassTransformer
                 if (method.name.equals("isCancelable")    && method.desc.equals(boolDesc))  hasCancelable = true;
                 if (method.name.equals("hasResult")       && method.desc.equals(boolDesc))  hasResult = true;
             }
-            if (method.name.equals("<init>") && method.desc.equals(voidDesc)) hasDefaultCtr = true;
+            if (method.name.equals("<init>") && method.desc.equals(causeDesc)) hasDefaultCtr = true;
         }
 
         if (classNode.visibleAnnotations != null)
@@ -154,12 +157,14 @@ public class EventSubclassTransformer
          *      {
          *              super();
          *      }
+         *      // Needed for event registration, even if the Event has a cause constructor
          */
         if (!hasDefaultCtr)
         {
-            MethodNode method = new MethodNode(ACC_PUBLIC, "<init>", voidDesc, null, null);
+            MethodNode method = new MethodNode(ACC_PUBLIC, "<init>", causeDesc, null, null);
             method.instructions.add(new VarInsnNode(ALOAD, 0));
-            method.instructions.add(new MethodInsnNode(INVOKESPECIAL, tSuper.getInternalName(), "<init>", voidDesc, false));
+            method.instructions.add(new VarInsnNode(ALOAD, 1)); // Load the cause to call
+            method.instructions.add(new MethodInsnNode(INVOKESPECIAL, tSuper.getInternalName(), "<init>", causeDesc, false));
             method.instructions.add(new InsnNode(RETURN));
             classNode.methods.add(method);
         }

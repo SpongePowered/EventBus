@@ -32,8 +32,16 @@ import net.minecraftforge.eventbus.ListenerList;
 public class GenericEvent<T> extends Event implements IGenericEvent<T>
 {
     private Class<T> type;
-    protected GenericEvent(Class<T> type)
+    @Deprecated
+    /**
+     * FOR TESTING ONLY - THIS WILL BE REMOVED!
+     */
+    protected GenericEvent(Class<T> type) {
+        this(Cause.of("DUMMY GENERIC EVENT CAUSE"), type);
+    }
+    protected GenericEvent(Cause cause, Class<T> type)
     {
+        super(cause);
         this.type = type;
     }
 
@@ -45,7 +53,9 @@ public class GenericEvent<T> extends Event implements IGenericEvent<T>
 
     //Default things that are added by EventSubclassTransformer, but as we are excluded from transformers we must add ourselves.
     private static ListenerList LISTENER_LIST;
-    public GenericEvent(){ }
+    public GenericEvent(Cause cause) {
+        super(cause);
+    }
 
     @Override
     protected void setup()

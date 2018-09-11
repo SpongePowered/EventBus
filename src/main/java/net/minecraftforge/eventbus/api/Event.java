@@ -26,7 +26,9 @@ import javax.annotation.Nullable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -42,19 +44,79 @@ public class Event
 
     public enum Result
     {
-        DENY,
-        DEFAULT,
-        ALLOW
+        DENY()
+            {
+                @Override
+                public boolean orElse(BooleanSupplier callable)
+                {
+                    return false;
+                }
+            },
+        DEFAULT()
+            {
+                @Override
+                public boolean orElse(BooleanSupplier callable)
+                {
+                    return callable.getAsBoolean();
+                }
+            },
+        ALLOW()
+            {
+                @Override
+                public boolean orElse(BooleanSupplier callable)
+                {
+                    return true;
+                }
+            };
+
+        /**
+         * Depending on this result, if the result is allowing something, or defaulting
+         * to the provided {@link BooleanSupplier supplier}.
+         *
+         * @param callable The callable to use if default
+         * @return
+         */
+        public abstract boolean orElse(BooleanSupplier callable);
     }
 
     private boolean isCanceled = false;
     private Result result = Result.DEFAULT;
     private static ListenerList listeners = new ListenerList();
     private EventPriority phase = null;
+    private final Cause cause;
 
-    public Event()
+    @Deprecated
+    /**
+     * FOR TESTING ONLY. THIS WILL BE REMOVED IN THE FINAL MERGE!
+     */
+    public Event() {
+        this(Cause.of("DUMMY CAUSE"));
+    }
+
+    public Event(Cause cause)
     {
         setup();
+        this.cause = checkNotNull(cause, "cause");
+    }
+
+    /**
+     * Get the cause for the event.
+     *
+     * @return The cause
+     */
+    public final Cause getCause()
+    {
+        return this.cause;
+    }
+
+    /**
+     * Gets the source of the event (the first object in the cause).
+     *
+     * @return The event source
+     */
+    public final Object getSource()
+    {
+        return getCause().root();
     }
 
     /**

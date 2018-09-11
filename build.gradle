@@ -115,6 +115,7 @@ dependencies {
     implementation('org.apache.logging.log4j:log4j-api:2.11.+')
     implementation('cpw.mods:modlauncher:0.10.+:api')
     implementation('com.google.code.findbugs:jsr305:3.0.2')
+    implementation('com.google.guava:guava:21.0')
     api('net.jodah:typetools:0.6.0')
     mlserviceImplementation('cpw.mods:modlauncher:0.10.+:api')
     mlserviceImplementation(sourceSets.main.output)

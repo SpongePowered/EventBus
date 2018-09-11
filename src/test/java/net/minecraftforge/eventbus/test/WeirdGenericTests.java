@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import net.minecraftforge.eventbus.api.BusBuilder;
+import net.minecraftforge.eventbus.api.Cause;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,7 @@ public class WeirdGenericTests {
 	public void testGenericListener() {
 		IEventBus bus = BusBuilder.builder().build();
 		bus.addGenericListener(List.class, this::handleGenericEvent);
-		bus.post(new GenericEvent<List<String>>() {
+		bus.post(new GenericEvent<List<String>>(Cause.of(new Object())) {
 			public Type getGenericType() {
 				return List.class;
 			};
